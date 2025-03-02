@@ -1,0 +1,12 @@
+# Node modules (caso use npm para dependências)
+node_modules/
+
+# Logs
+*.log
+
+# Sistema operacional
+.DS_Store
+Thumbs.db
+
+# Firebase cache (opcional)
+.firebase/

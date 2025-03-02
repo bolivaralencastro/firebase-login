@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Firebase Auth e Firestore - Teste Simplificado</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="loggedOutView">
+        <h1>Login</h1>
+        <input type="email" id="email" placeholder="Email" required>
+        <input type="password" id="password" placeholder="Senha" required>
+        <button id="btnLogin" type="button">Login</button>
+        <button id="btnGoogle" type="button">Login com Google</button>
+        <p id="message"></p>
+
+         <!-- ADICIONE ESTA SEÇÃO (se já não estiver lá) -->
+    <h2>Publicações</h2>  <!-- Título (opcional) -->
+    <ul id="publicPostsList"></ul> <!-- A lista de posts públicos -->
+    <!-- FIM DA SEÇÃO A SER ADICIONADA -->
+    </div>
+
+    <div id="loggedInView" hidden>
+        <h1>Bem-vindo!</h1>
+        <button id="btnLogout" type="button">Logout</button>
+
+        <h2>Dados do Firestore</h2>
+        <input type="text" id="dataInput" placeholder="Dado para salvar">
+        <button id="btnSaveData" type="button">Salvar</button>
+        <ul id="dataList"></ul>
+        <p id="dataMessage"></p>
+    </div>
+
+    <script type="module" src="js/firebaseConfig.js"></script>
+    <script type="module" src="js/auth.js"></script>
+    <script type="module" src="js/main.js"></script>
+</body>
+</html>
