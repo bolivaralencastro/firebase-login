@@ -1,106 +1,103 @@
-// ui.js
+// ui.js - versão simplificada
+import { loginWithGoogle, logout } from './auth.js';
+import { addPost, getPosts } from './firestore.js';
+import { auth } from './firebaseConfig.js';
 
-export function initTabs() {
-    const tabs = document.querySelectorAll(".tab");
-    const tabContents = document.querySelectorAll(".tab-content");
+// Função para atualizar a interface
+export const updateUI = (user) => {
+  console.log("Atualizando UI para:", user ? "usuário logado" : "usuário deslogado");
+  
+  const loginSection = document.getElementById('login-section');
+  const postSection = document.getElementById('post-section');
+  const userInfo = document.getElementById('user-info');
+  
+  if (user) {
+    // Usuário logado
+    loginSection.style.display = 'none';
+    postSection.style.display = 'block';
+    userInfo.innerHTML = `
+      <p>Bem-vindo, ${user.displayName || 'Usuário'}</p>
+      <button id="logout-btn" class="btn">Sair</button>
+    `;
+    
+    document.getElementById('logout-btn').onclick = logout;
+    
+    // Carregar posts
+    loadPosts();
+  } else {
+    // Usuário deslogado
+    loginSection.style.display = 'block';
+    postSection.style.display = 'none';
+    userInfo.innerHTML = '';
+  }
+};
 
-    tabs.forEach(tab => {
-        tab.addEventListener("click", () => {
-            tabs.forEach(t => t.classList.remove("active"));
-            tabContents.forEach(tc => tc.classList.remove("active"));
+// Função para carregar e exibir posts
+export const loadPosts = async () => {
+  const postsList = document.getElementById('posts-list');
+  postsList.innerHTML = '<p>Carregando publicações...</p>';
+  
+  const posts = await getPosts();
+  
+  if (posts.length === 0) {
+    postsList.innerHTML = '<p>Nenhuma publicação encontrada.</p>';
+    return;
+  }
+  
+  postsList.innerHTML = '';
+  posts.forEach(post => {
+    const postElement = document.createElement('div');
+    postElement.className = 'post';
+    postElement.innerHTML = `
+      <h3>${post.title}</h3>
+      <p>${post.content}</p>
+      <small>Por: ${post.userName} - ${post.createdAt.toDate ? post.createdAt.toDate().toLocaleString() : 'Data desconhecida'}</small>
+    `;
+    postsList.appendChild(postElement);
+  });
+};
 
-            tab.classList.add("active");
-            const tabId = tab.getAttribute("data-tab");
-            document.getElementById(`${tabId}-tab`).classList.add("active");
-        });
-    });
-}
-
-export function toggleTheme() {
-    const body = document.body;
-    body.classList.toggle("dark-theme");
-    const themeIcon = document.querySelector("#theme-toggle i");
-    if (body.classList.contains("dark-theme")) {
-         themeIcon.classList.remove("fa-moon");
-         themeIcon.classList.add("fa-sun");
-    } else {
-         themeIcon.classList.remove("fa-sun");
-         themeIcon.classList.add("fa-moon");
-    }
-}
-
-export function initThemeToggle() {
-    const themeToggle = document.getElementById("theme-toggle");
-    if (themeToggle) {
-         themeToggle.addEventListener("click", toggleTheme);
-    }
-}
-
-export function showLoading() {
-    const overlay = document.getElementById("loadingOverlay");
-    if (overlay) {
-         overlay.classList.remove("hidden");
-    }
-}
-
-export function hideLoading() {
-    const overlay = document.getElementById("loadingOverlay");
-    if (overlay) {
-         overlay.classList.add("hidden");
-    }
-}
-
-export function showMessage(element, msg, type = "info") {
-    if (element) {
-         element.textContent = msg;
-         element.className = "message " + type;
-    }
-}
-
-export function togglePostsView(containerId, view = "list") {
-    const container = document.getElementById(containerId);
-    if (container) {
-         if (view === "grid") {
-              container.classList.remove("list-view");
-              container.classList.add("grid-view");
-         } else {
-              container.classList.remove("grid-view");
-              container.classList.add("list-view");
-         }
-    }
-}
-
-export function confirmAction(messageText) {
-    return new Promise((resolve) => {
-         const confirmModal = document.getElementById("confirmModal");
-         const confirmMessage = document.getElementById("confirmMessage");
-         const confirmOK = document.getElementById("confirmOK");
-         const confirmCancel = document.getElementById("confirmCancel");
-
-         if (confirmModal && confirmMessage && confirmOK && confirmCancel) {
-              confirmMessage.textContent = messageText;
-              confirmModal.classList.remove("hidden");
-
-              const cleanup = () => {
-                  confirmModal.classList.add("hidden");
-                  confirmOK.removeEventListener("click", onConfirm);
-                  confirmCancel.removeEventListener("click", onCancel);
-              };
-
-              const onConfirm = () => {
-                  cleanup();
-                  resolve(true);
-              };
-
-              const onCancel = () => {
-                  cleanup();
-                  resolve(false);
-              };
-
-              confirmOK.addEventListener("click", onConfirm);
-              confirmCancel.addEventListener("click", onCancel);
-         } else {
-              resolve(false);
-         }
-    });
-}
+// Inicializa elementos UI - versão simplificada
+export const initUI = () => {
+  // Configurar botão de login
+  const loginButton = document.getElementById('login-btn');
+  if (loginButton) {
+    // Remover qualquer handler anterior
+    loginButton.onclick = null;
+    // Adicionar novo handler
+    loginButton.onclick = () => {
+      console.log("Botão de login clicado");
+      loginWithGoogle();
+    };
+  }
+  
+  // Configurar formulário de post
+  const postForm = document.getElementById('post-form');
+  if (postForm) {
+    postForm.onsubmit = async (e) => {
+      e.preventDefault();
+      
+      const title = document.getElementById('post-title').value;
+      const content = document.getElementById('post-content').value;
+      
+      if (!title || !content) {
+        alert('Por favor preencha todos os campos');
+        return;
+      }
+      
+      const user = auth.currentUser;
+      if (!user) {
+        alert('Você precisa estar logado para publicar');
+        return;
+      }
+      
+      const success = await addPost(title, content, user.uid, user.displayName || 'Usuário');
+      
+      if (success) {
+        document.getElementById('post-title').value = '';
+        document.getElementById('post-content').value = '';
+        loadPosts();
+      }
+    };
+  }
+};

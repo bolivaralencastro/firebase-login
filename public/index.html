@@ -1,210 +1,58 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Firebase Auth - App Melhorado</title>
-    <link rel="stylesheet" href="styles.css"> <!-- Mantém o link para SEU styles.css -->
-    <!-- Adicionar ícones (Font Awesome) -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Firebase Login & Posts</title>
+  <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
+  <div class="container">
     <header>
-        <div class="container">
-            <h1>Firebase App</h1>
-            <div id="theme-toggle">
-                <i class="fas fa-moon"></i> <!-- Ícone de lua para modo escuro -->
-            </div>
-        </div>
+      <h1>Meu Blog Simples</h1>
+      <div id="user-info"></div>
     </header>
 
-    <main class="container">
-        <!-- Área de loading global -->
-        <div id="loadingOverlay" class="hidden">
-            <div class="spinner"></div>
+    <main>
+      <!-- Seção de Login -->
+      <section id="login-section">
+        <h2>Faça login para continuar</h2>
+        <button id="login-btn" class="btn">Login com Google</button>
+      </section>
+
+
+      <!-- Seção de Posts -->
+      <section id="post-section" style="display: none;">
+        <div class="post-form-container">
+          <h2>Criar Nova Publicação</h2>
+          <form id="post-form">
+            <div class="form-group">
+              <label for="post-title">Título</label>
+              <input type="text" id="post-title" required>
+            </div>
+            <div class="form-group">
+              <label for="post-content">Conteúdo</label>
+              <textarea id="post-content" rows="4" required></textarea>
+            </div>
+            <button type="submit" class="btn">Publicar</button>
+          </form>
         </div>
 
-        <!-- Visão de usuário deslogado -->
-        <div id="loggedOutView">
-            <div class="auth-container">
-                <div class="tabs">
-                    <button class="tab active" data-tab="login">Login</button>
-                    <button class="tab" data-tab="register">Registrar</button>
-                </div>
-
-                <div class="tab-content active" id="login-tab">
-                    <h2>Login</h2>
-                    <form id="loginForm">
-                        <div class="form-group">
-                            <label for="loginEmail">Email</label>
-                            <input type="email" id="loginEmail" placeholder="Seu email" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="loginPassword">Senha</label>
-                            <input type="password" id="loginPassword" placeholder="Sua senha" required>
-                        </div>
-                        <button id="btnLogin" type="submit" class="btn btn-primary">
-                            <i class="fas fa-sign-in-alt"></i> Login
-                        </button>
-                        <div class="social-login">
-                            <button id="btnGoogle" type="button" class="btn btn-social">
-                                <i class="fab fa-google"></i> Login com Google
-                            </button>
-                        </div>
-                        <p id="loginMessage" class="message"></p>
-                        <p class="forgot-password">
-                            <a href="#" id="forgotPassword">Esqueceu a senha?</a>
-                        </p>
-                    </form>
-                </div>
-
-                <div class="tab-content" id="register-tab">
-                    <h2>Criar Conta</h2>
-                    <form id="registerForm">
-                        <div class="form-group">
-                            <label for="registerName">Nome</label>
-                            <input type="text" id="registerName" placeholder="Seu nome" required>  <!-- Adicionado campo de nome -->
-                        </div>
-                        <div class="form-group">
-                            <label for="registerEmail">Email</label>
-                            <input type="email" id="registerEmail" placeholder="Seu email" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="registerPassword">Senha</label>
-                            <input type="password" id="registerPassword" placeholder="Mínimo 6 caracteres" minlength="6" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="registerPasswordConfirm">Confirmar Senha</label>
-                            <input type="password" id="registerPasswordConfirm" placeholder="Confirme sua senha" minlength="6" required>
-                        </div>
-                        <button id="btnRegister" type="submit" class="btn btn-primary">
-                            <i class="fas fa-user-plus"></i> Criar Conta
-                        </button>
-                        <p id="registerMessage" class="message"></p>
-                    </form>
-                </div>
-            </div>
-
-            <!-- Seção pública de publicações -->
-            <div class="public-content">
-                <h2>Publicações Recentes</h2>
-                <div class="filter-controls">
-                    <input type="text" id="publicSearchInput" placeholder="Filtrar publicações...">
-                    <select id="publicSortSelect">
-                        <option value="recent">Mais recentes</option>
-                        <option value="oldest">Mais antigas</option>
-                    </select>
-                    <div class="view-toggle">
-                        <button id="listViewBtn" class="active"><i class="fas fa-list"></i></button>
-                        <button id="gridViewBtn"><i class="fas fa-th"></i></button>
-                    </div>
-                </div>
-                <div id="publicPostsContainer" class="posts-container list-view">
-                    <div id="publicPostsLoading" class="loading-indicator">
-                        <div class="spinner"></div>
-                    </div>
-                    <div id="publicPostsList" class="posts-list"></div>
-                    <div id="publicPagination" class="pagination">
-                        <button id="prevPageBtn" disabled>Anterior</button>
-                        <span id="pageInfo">Página 1</span>
-                        <button id="nextPageBtn">Próxima</button>
-                    </div>
-                </div>
-            </div>
+        <div class="posts-container">
+          <h2>Publicações Recentes</h2>
+          <div id="posts-list">
+            <p>Carregando publicações...</p>
+          </div>
         </div>
-
-        <!-- Visão de usuário logado -->
-        <div id="loggedInView" hidden>
-            <div class="user-panel">
-                <div class="user-info">
-                    <div class="avatar">
-                        <img id="userAvatar" src="default-avatar.png" alt="Avatar">  <!--  src="default-avatar.png" -->
-                    </div>
-                    <div class="user-details">
-                        <h2 id="welcomeMessage">Bem-vindo!</h2>
-                        <p id="userEmail"></p>
-                    </div>
-                </div>
-                <button id="btnLogout" type="button" class="btn btn-outline">
-                    <i class="fas fa-sign-out-alt"></i> Logout
-                </button>
-            </div>
-
-            <div class="content-panel">
-                <h2>Minhas Publicações</h2>
-
-                <div class="data-form">
-                    <div class="form-group">
-                        <label for="dataInput">Nova Publicação</label>
-                        <textarea id="dataInput" rows="3" placeholder="O que você quer compartilhar?"></textarea>
-                    </div>
-                    <div class="form-actions">
-                        <button id="btnCancelEdit" class="btn btn-outline hidden">
-                            <i class="fas fa-times"></i> Cancelar
-                        </button>
-                        <button id="btnSaveData" class="btn btn-primary">
-                            <i class="fas fa-save"></i> Publicar
-                        </button>
-                    </div>
-                    <p id="dataMessage" class="message"></p>
-                </div>
-
-                <div class="filter-controls">
-                    <input type="text" id="userSearchInput" placeholder="Filtrar minhas publicações...">
-                    <select id="userSortSelect">
-                        <option value="recent">Mais recentes</option>
-                        <option value="oldest">Mais antigas</option>
-                    </select>
-                    <div class="view-toggle">
-                        <button id="userListViewBtn" class="active"><i class="fas fa-list"></i></button>
-                        <button id="userGridViewBtn"><i class="fas fa-th"></i></button>
-                    </div>
-                </div>
-
-                <div id="userDataContainer" class="posts-container list-view">
-                    <div id="userDataLoading" class="loading-indicator">
-                        <div class="spinner"></div>
-                    </div>
-                    <div id="dataList" class="posts-list"></div>
-                </div>
-            </div>
-        </div>
+      </section>
     </main>
 
     <footer>
-        <div class="container">
-            <p>© 2024 Firebase App. Todos os direitos reservados.</p>  <!-- Ano corrigido -->
-        </div>
+      <p>&copy; 2025 Meu Blog Simples</p>
     </footer>
+  </div>
 
-    <!-- Modais -->
-    <div id="confirmModal" class="modal hidden">
-        <div class="modal-content">
-            <h3>Confirmar Ação</h3>
-            <p id="confirmMessage">Tem certeza que deseja realizar esta ação?</p>
-            <div class="modal-actions">
-                <button id="confirmCancel" class="btn btn-outline">Cancelar</button>
-                <button id="confirmOK" class="btn btn-danger">Confirmar</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="resetPasswordModal" class="modal hidden">
-        <div class="modal-content">
-            <h3>Recuperar Senha</h3>
-            <p>Informe seu email para receber um link de recuperação de senha.</p>
-            <div class="form-group">
-                <input type="email" id="resetEmail" placeholder="Seu email" required>
-            </div>
-            <p id="resetMessage" class="message"></p>
-            <div class="modal-actions">
-                <button id="resetCancel" class="btn btn-outline">Cancelar</button>
-                <button id="resetSubmit" class="btn btn-primary">Enviar</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Scripts (agora só main.js) -->
-    <script type="module" src="js/main.js"></script>
+  <!-- Scripts -->
+  <script type="module" src="js/main.js"></script>
 </body>
 </html>
